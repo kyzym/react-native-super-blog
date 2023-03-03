@@ -35,7 +35,7 @@ export const RegistrationScreen = () => {
   };
 
   return (
-    <View style={{ ...styles.form, marginBottom: isKeyboardShown ? -180 : 0 }}>
+    <View style={{ ...styles.form, marginBottom: isKeyboardShown ? -200 : 0 }}>
       <Text style={styles.formTitle}>Registration</Text>
       <TextInput
         style={[styles.input, isFocused === "name" && styles.inputFocused]}

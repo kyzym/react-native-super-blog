@@ -11,8 +11,9 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { RegistrationScreen } from "./components/RegistrationScreen";
-import { LoginScreen } from "./components/LoginScreen";
+import { RegistrationScreen } from "./screens/RegistrationScreen";
+import { LoginScreen } from "./screens/LoginScreen";
+// import {  } from "react";
 
 export default function App() {
   const bgImage = require("./assets/images/PhotoBG.jpg");
