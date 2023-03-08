@@ -2,26 +2,22 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback } from "react";
-import {
-  Dimensions,
-  ImageBackground,
-  Keyboard,
-  KeyboardAvoidingView,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { StyleSheet, View } from "react-native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { NavigationContainer } from "@react-navigation/native";
+
 import { RegistrationScreen } from "./screens/RegistrationScreen";
 import { LoginScreen } from "./screens/LoginScreen";
-// import {  } from "react";
+
+const AuthStack = createStackNavigator();
 
 export default function App() {
-  const bgImage = require("./assets/images/PhotoBG.jpg");
   const [fontsLoaded] = useFonts({
     "Roboto-Bold": require("./assets/fonts/Roboto-Bold.ttf"),
     "Roboto-Medium": require("./assets/fonts/Roboto-Medium.ttf"),
     "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
   });
+
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded) {
       await SplashScreen.hideAsync();
@@ -33,20 +29,24 @@ export default function App() {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <NavigationContainer>
       <View style={styles.container} onLayout={onLayoutRootView}>
-        <ImageBackground source={bgImage} style={styles.bgImage}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-          >
-            <RegistrationScreen />
-            {/* <LoginScreen /> */}
-          </KeyboardAvoidingView>
-        </ImageBackground>
+        <AuthStack.Navigator>
+          <AuthStack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ headerShown: false }}
+          />
+          <AuthStack.Screen
+            name="Registration"
+            component={RegistrationScreen}
+            options={{ headerShown: false }}
+          />
+        </AuthStack.Navigator>
 
         <StatusBar style="auto" />
       </View>
-    </TouchableWithoutFeedback>
+    </NavigationContainer>
   );
 }
 
@@ -55,13 +55,5 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     justifyContent: "flex-end",
-  },
-  bgImage: {
-    flex: 1,
-    resizeMode: "cover",
-    justifyContent: "flex-end",
-
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height,
   },
 });
