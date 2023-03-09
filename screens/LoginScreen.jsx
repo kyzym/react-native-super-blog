@@ -36,6 +36,7 @@ export const LoginScreen = ({ navigation }) => {
 
     console.log(userLoginState);
     setUserLoginState(initialState);
+    navigation.navigate("Home");
   };
 
   return (

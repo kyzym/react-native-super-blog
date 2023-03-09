@@ -41,6 +41,7 @@ export const RegistrationScreen = ({ navigation }) => {
     }
     console.log(userState);
     setUserState(initialState);
+    navigation.navigate("Home");
   };
 
   return (
