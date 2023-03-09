@@ -1,10 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
 import { PostsScreen } from "./PostsScreen";
+import { TabMenu } from "../components/TabMenu";
 export const Home = () => {
   return (
-    <View style={styles.container}>
+    <TabMenu>
       <PostsScreen />
-    </View>
+    </TabMenu>
   );
 };
 

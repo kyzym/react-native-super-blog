@@ -37,7 +37,6 @@ export const useRoute = (isAuth) => {
   }
   return (
     <MainTab.Navigator>
-      {/* <MainTab.Screen name="Home" component={Home} /> */}
       <MainTab.Screen name="Posts" component={PostsScreen} />
       <MainTab.Screen name="CreatePosts" component={CreatePostsScreen} />
       <MainTab.Screen name="Profile" component={ProfileScreen} />

@@ -7,4 +7,5 @@ export const colors = {
   btnTextColor: "#fff",
   formBackgroundColor: "#fff",
   inputTextColor: "#212121",
+  navIconsColor: "#212121cc",
 };
