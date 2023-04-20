@@ -16,7 +16,9 @@ import {
 } from "react-native";
 import styles from "./RegistrationScreenStyle.js";
 import { getBorderColor } from "../../assets/helpers/utils.js";
-import { Ionicons } from "@expo/vector-icons";
+
+import { useDispatch } from "react-redux";
+import { authSignUpUser } from "../../redux/auth/authOperation";
 
 const initialState = {
   login: "",
@@ -30,6 +32,7 @@ const RegistrationScreen = ({ navigation }) => {
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [state, setState] = useState(initialState);
   const [showPassword, setShowPassword] = useState(false);
+  const dispatch = useDispatch();
 
   const [windowWidth, setWindowWidth] = useState(
     Dimensions.get("window").width
@@ -61,6 +64,7 @@ const RegistrationScreen = ({ navigation }) => {
       return alert("All fields need to be filled!");
     }
 
+    dispatch(authSignUpUser(state));
     console.log(state);
     setState(initialState);
 

@@ -14,6 +14,9 @@ import {
 import styles from "./LoginScreenStyles";
 import { getBorderColor } from "../../assets/helpers/utils";
 
+import { useDispatch } from "react-redux";
+import { authSignInUser } from "../../redux/auth/authOperation";
+
 const initialState = {
   email: "",
   password: "",
@@ -43,6 +46,8 @@ const LoginScreen = ({ navigation }) => {
     return () => dimensionsHandler.remove();
   }, []);
 
+  const dispatch = useDispatch();
+
   const showPasswordHandler = () => {
     const toggle = showPassword ? false : true;
     setShowPassword(toggle);
@@ -54,6 +59,7 @@ const LoginScreen = ({ navigation }) => {
     if (!state.email.trim() || !state.password.trim()) {
       return alert("All field need to bo filled!");
     }
+    dispatch(authSignInUser(state));
     console.log(state);
     setState(initialState);
     navigation.navigate("Home");

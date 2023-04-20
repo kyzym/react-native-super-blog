@@ -11,7 +11,7 @@ const MainStack = createStackNavigator();
 const ScreenStack = createStackNavigator();
 
 const useRoute = (isAuth) => {
-  return isAuth ? (
+  return !isAuth ? (
     <MainStack.Navigator initialRouteName="Login">
       <MainStack.Screen
         options={{ headerShown: false }}
@@ -26,7 +26,7 @@ const useRoute = (isAuth) => {
       <MainStack.Screen
         options={{
           headerShown: false,
-          headerTitle: "Публикации",
+          headerTitle: "Posts",
           headerTitleStyle: { color: "#212121", fontSize: 17 },
           headerTitleAlign: "center",
         }}
