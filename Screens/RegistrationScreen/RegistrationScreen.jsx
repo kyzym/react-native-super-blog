@@ -56,7 +56,7 @@ const RegistrationScreen = ({ navigation }) => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
   }, []);
 
-  const keyboardHide = useCallback(() => {
+  const keyboardHide = useCallback(async () => {
     setShowKeyboard(false);
     Keyboard.dismiss();
 
@@ -64,11 +64,16 @@ const RegistrationScreen = ({ navigation }) => {
       return alert("All fields need to be filled!");
     }
 
-    dispatch(authSignUpUser(state));
-    console.log(state);
-    setState(initialState);
+    try {
+      await dispatch(authSignUpUser(state));
 
-    navigation.navigate("Home");
+      console.log(state);
+      setState(initialState);
+
+      navigation.navigate("Home");
+    } catch (error) {
+      alert("Registration failed: " + error.message);
+    }
   }, [state, navigation]);
 
   const keyboardHideOut = useCallback(() => {

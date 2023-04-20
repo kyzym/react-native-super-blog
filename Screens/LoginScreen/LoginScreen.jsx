@@ -53,16 +53,20 @@ const LoginScreen = ({ navigation }) => {
     setShowPassword(toggle);
   };
 
-  const keyboardHide = () => {
+  const keyboardHide = async () => {
     setShowKeyboard(false);
     Keyboard.dismiss();
     if (!state.email.trim() || !state.password.trim()) {
-      return alert("All field need to bo filled!");
+      return alert("All fields need to be filled!");
     }
-    dispatch(authSignInUser(state));
-    console.log(state);
-    setState(initialState);
-    navigation.navigate("Home");
+    try {
+      await dispatch(authSignInUser(state));
+      console.log("state in login", state);
+      setState(initialState);
+      navigation.navigate("Home");
+    } catch (error) {
+      alert("Login failed: " + error.message);
+    }
   };
 
   const keyboardHideOut = () => {
