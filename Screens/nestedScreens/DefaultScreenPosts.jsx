@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { Feather } from "@expo/vector-icons";
 import {
-  Dimensions,
   FlatList,
   Image,
   StyleSheet,
@@ -16,25 +15,6 @@ import { useWindowDimensions } from "react-native";
 const DefaultScreenPosts = ({ navigation, route }) => {
   const [photo, setPhoto] = useState([]);
   const windowDimensions = useWindowDimensions();
-
-  // const [windowDimensions.width, setwindowDimensions.width] = useState(
-  //   Dimensions.get("window").width
-  // );
-  // const [windowDimensions.height, setwindowDimensions.height] = useState(
-  //   Dimensions.get("window").height
-  // );
-
-  // useEffect(() => {
-  //   const onChange = () => {
-  //     const width = Dimensions.get("window").width;
-  //     setwindowDimensions.width(width);
-  //     const height = Dimensions.get("window").height;
-  //     setwindowDimensions.height(height);
-  //   };
-  //   const dimensionsHandler = Dimensions.addEventListener("change", onChange);
-
-  //   return () => dimensionsHandler.remove();
-  // }, []);
 
   useEffect(() => {
     async function prepare() {
@@ -58,7 +38,6 @@ const DefaultScreenPosts = ({ navigation, route }) => {
   useEffect(() => {
     getDataFromFirestore();
   }, []);
-  console.log("photo_", photo);
 
   return (
     <View style={styles.container}>
@@ -85,6 +64,7 @@ const DefaultScreenPosts = ({ navigation, route }) => {
               marginBottom: 91,
             }}
           >
+            {/* {console.log("item___", item)} */}
             <Image
               source={{ uri: item.photo }}
               style={{
@@ -140,8 +120,8 @@ const DefaultScreenPosts = ({ navigation, route }) => {
                     <TouchableOpacity
                       onPress={() =>
                         navigation.navigate("MapScreen", {
-                          latitude: item.post.location.latitude,
-                          longitude: item.post.location.longitude,
+                          latitude: item.location.latitude,
+                          longitude: item.location.longitude,
                         })
                       }
                     >

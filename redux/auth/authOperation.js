@@ -6,10 +6,6 @@ const authSignUpUser =
   ({ login, email, password }) =>
   async (dispatch, getState) => {
     try {
-      // const { user } = await db
-      //   .auth()
-      //   .createUserWithEmailAndPassword(email, password);
-      // console.log("user_reg", user);
       await db.auth().createUserWithEmailAndPassword(email, password);
 
       const user = await db.auth().currentUser;
@@ -26,8 +22,6 @@ const authSignUpUser =
       };
 
       dispatch(authSlice.actions.updateUserProfile(userUpdateProfile));
-
-      // return user;
     } catch (error) {
       console.log("error_authSignUpUser", error.message);
       throw error;
@@ -43,29 +37,37 @@ const authSignInUser =
       return user;
     } catch (error) {
       console.log("error_authSignInUser", error.message);
-      console.log(error.message);
+      // console.log(error.message);
       throw error;
     }
   };
 
 const authSignOutUser = () => async (dispatch, getState) => {
-  await db.auth().signOut();
+  try {
+    await db.auth().signOut();
 
-  dispatch(authSlice.actions.authSignOut());
+    dispatch(authSlice.actions.authSignOut());
+  } catch (error) {
+    console.log("error_authSignOutUser", error.message);
+  }
 };
 
 const authStateChangeUser = () => async (dispatch, getState) => {
-  await db.auth().onAuthStateChanged((user) => {
-    if (user) {
-      const userUpdateProfile = {
-        login: user.displayName,
-        userId: user.uid,
-      };
+  try {
+    await db.auth().onAuthStateChanged((user) => {
+      if (user) {
+        const userUpdateProfile = {
+          login: user.displayName,
+          userId: user.uid,
+        };
 
-      dispatch(authSlice.actions.authStateChange({ stateChange: true }));
-      dispatch(authSlice.actions.updateUserProfile(userUpdateProfile));
-    }
-  });
+        dispatch(authSlice.actions.authStateChange({ stateChange: true }));
+        dispatch(authSlice.actions.updateUserProfile(userUpdateProfile));
+      }
+    });
+  } catch (error) {
+    console.log("error_authStateChangeUser", error.message);
+  }
 };
 
 export { authSignInUser, authSignUpUser, authSignOutUser, authStateChangeUser };

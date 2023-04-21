@@ -65,7 +65,6 @@ const CreatePostsScreen = ({ navigation }) => {
           longitude: location.coords.longitude,
         };
         setLocation(coords);
-        console.log("location", location);
 
         setPhoto(uri);
         console.log("photo", uri);
@@ -110,6 +109,8 @@ const CreatePostsScreen = ({ navigation }) => {
         .firestore()
         .collection("posts")
         .add({ photo, location, title, nameLocation, userId, login });
+      console.log("createPost", createPost);
+      console.log(location);
     } catch (error) {
       console.error("Error adding document: ", error);
     }
@@ -178,7 +179,7 @@ const CreatePostsScreen = ({ navigation }) => {
             )}
 
             <TouchableOpacity onPress={takePhoto} style={styles.photoIcon}>
-              <FontAwesome name="camera" size={24} color={"#"} />
+              <FontAwesome name="camera" size={24} color={"#BDBDBD"} />
             </TouchableOpacity>
           </Camera>
         )}
@@ -197,20 +198,20 @@ const CreatePostsScreen = ({ navigation }) => {
           <TextInput
             style={{ ...styles.input, paddingLeft: 0 }}
             placeholder="Название..."
-            placeholderTextColor={"#"}
+            placeholderTextColor={"#BDBDBD"}
             inputMode="text"
             value={title}
             onChangeText={(value) => setTitle(value)}
           />
           <View style={styles.inputBox}>
             <TouchableOpacity style={styles.inputIcon}>
-              <Feather name="map-pin" size={24} color={"#"} />
+              <Feather name="map-pin" size={24} color={"#BDBDBD"} />
             </TouchableOpacity>
 
             <TextInput
               style={{ ...styles.input, paddingLeft: 32 }}
-              placeholder="Местность..."
-              placeholderTextColor={"#"}
+              placeholder="Location..."
+              placeholderTextColor={"#BDBDBD"}
               inputMode="text"
               value={nameLocation}
               onChangeText={(value) => setNameLocation(value)}
@@ -228,7 +229,7 @@ const CreatePostsScreen = ({ navigation }) => {
             <Text
               style={{
                 ...styles.textButton,
-                color: photo ? "#FFFFFF" : "#",
+                color: photo ? "#FFFFFF" : "#BDBDBD",
               }}
             >
               Опубликовать
@@ -245,7 +246,7 @@ const CreatePostsScreen = ({ navigation }) => {
             }}
             style={styles.buttonGo}
           >
-            <Feather name="trash-2" size={24} color={"#"} />
+            <Feather name="trash-2" size={24} color={"#BDBDBD"} />
           </TouchableOpacity>
         </View>
       </View>
