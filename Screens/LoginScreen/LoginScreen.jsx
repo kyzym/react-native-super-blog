@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
-  Dimensions,
   ImageBackground,
   Keyboard,
   KeyboardAvoidingView,
@@ -10,6 +9,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  useWindowDimensions,
 } from "react-native";
 import styles from "./LoginScreenStyles";
 import { getBorderColor } from "../../assets/helpers/utils";
@@ -27,24 +27,7 @@ const LoginScreen = ({ navigation }) => {
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [state, setState] = useState(initialState);
   const [showPassword, setShowPassword] = useState(false);
-
-  const [windowWidth, setWindowWidth] = useState(
-    Dimensions.get("window").width
-  );
-  const [windowHeight, setWindowHeight] = useState(
-    Dimensions.get("window").height
-  );
-  useEffect(() => {
-    const onChange = () => {
-      const width = Dimensions.get("window").width;
-      setWindowWidth(width);
-      const height = Dimensions.get("window").height;
-      setWindowHeight(height);
-    };
-    const dimensionsHandler = Dimensions.addEventListener("change", onChange);
-
-    return () => dimensionsHandler.remove();
-  }, []);
+  const windowDimensions = useWindowDimensions();
 
   const dispatch = useDispatch();
 
@@ -59,10 +42,13 @@ const LoginScreen = ({ navigation }) => {
     if (!state.email.trim() || !state.password.trim()) {
       return alert("All fields need to be filled!");
     }
+
     try {
       await dispatch(authSignInUser(state));
       console.log("state in login", state);
+
       setState(initialState);
+
       navigation.navigate("Home");
     } catch (error) {
       alert("Login failed: " + error.message);
@@ -86,8 +72,8 @@ const LoginScreen = ({ navigation }) => {
           resizeMode="cover"
           style={{
             ...styles.imageBG,
-            width: windowWidth,
-            height: windowHeight,
+            width: windowDimensions.width,
+            height: windowDimensions.height,
           }}
         >
           <KeyboardAvoidingView
@@ -96,7 +82,7 @@ const LoginScreen = ({ navigation }) => {
             <View
               style={{
                 ...styles.form,
-                width: windowWidth,
+                width: windowDimensions.width,
                 marginBottom: showKeyboard ? -250 : 0,
               }}
             >

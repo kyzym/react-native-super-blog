@@ -10,27 +10,31 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import db from "../../firebase/config";
+import { useWindowDimensions } from "react-native";
 
 const DefaultScreenPosts = ({ navigation, route }) => {
   const [photo, setPhoto] = useState([]);
+  const windowDimensions = useWindowDimensions();
 
-  const [windowWidth, setWindowWidth] = useState(
-    Dimensions.get("window").width
-  );
-  const [windowHeight, setWindowHeight] = useState(
-    Dimensions.get("window").height
-  );
-  useEffect(() => {
-    const onChange = () => {
-      const width = Dimensions.get("window").width;
-      setWindowWidth(width);
-      const height = Dimensions.get("window").height;
-      setWindowHeight(height);
-    };
-    const dimensionsHandler = Dimensions.addEventListener("change", onChange);
+  // const [windowDimensions.width, setwindowDimensions.width] = useState(
+  //   Dimensions.get("window").width
+  // );
+  // const [windowDimensions.height, setwindowDimensions.height] = useState(
+  //   Dimensions.get("window").height
+  // );
 
-    return () => dimensionsHandler.remove();
-  }, []);
+  // useEffect(() => {
+  //   const onChange = () => {
+  //     const width = Dimensions.get("window").width;
+  //     setwindowDimensions.width(width);
+  //     const height = Dimensions.get("window").height;
+  //     setwindowDimensions.height(height);
+  //   };
+  //   const dimensionsHandler = Dimensions.addEventListener("change", onChange);
+
+  //   return () => dimensionsHandler.remove();
+  // }, []);
 
   useEffect(() => {
     async function prepare() {
@@ -39,11 +43,22 @@ const DefaultScreenPosts = ({ navigation, route }) => {
     prepare();
   }, []);
 
-  useEffect(() => {
-    if (route.params) {
-      setPhoto((prevState) => [...prevState, route.params]);
+  const getDataFromFirestore = async () => {
+    try {
+      await db
+        .firestore()
+        .collection("posts")
+        .onSnapshot((data) =>
+          setPhoto(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
+        );
+    } catch (error) {
+      console.log(error);
     }
-  }, [route.params]);
+  };
+  useEffect(() => {
+    getDataFromFirestore();
+  }, []);
+  console.log("photo_", photo);
 
   return (
     <View style={styles.container}>
@@ -66,28 +81,33 @@ const DefaultScreenPosts = ({ navigation, route }) => {
           <View
             style={{
               ...styles.cardContainer,
-              width: windowWidth,
+              width: windowDimensions.width,
               marginBottom: 91,
             }}
           >
             <Image
-              source={{ uri: item.post.photo }}
+              source={{ uri: item.photo }}
               style={{
                 ...styles.cardImage,
-                width: windowWidth - 16 * 2,
+                width: windowDimensions.width - 16 * 2,
               }}
             />
 
             <Text
               style={{
                 ...styles.cardTitle,
-                width: windowWidth - 16 * 2,
+                width: windowDimensions.width - 16 * 2,
               }}
             >
-              {item.post.title}
+              {item.title}
             </Text>
 
-            <View style={{ ...styles.cardThumb, width: windowWidth - 16 * 2 }}>
+            <View
+              style={{
+                ...styles.cardThumb,
+                width: windowDimensions.width - 16 * 2,
+              }}
+            >
               <View
                 style={{
                   flexDirection: "row",
@@ -101,7 +121,12 @@ const DefaultScreenPosts = ({ navigation, route }) => {
                 >
                   <TouchableOpacity
                     style={styles.cardWrapper}
-                    onPress={() => navigation.navigate("CommentsScreen")}
+                    onPress={() =>
+                      navigation.navigate("CommentsScreen", {
+                        postId: item.id,
+                        photo: item.photo,
+                      })
+                    }
                   >
                     <Feather
                       name="message-circle"
@@ -123,9 +148,7 @@ const DefaultScreenPosts = ({ navigation, route }) => {
                       <Feather name="map-pin" size={24} color={"#BDBDBD"} />
                     </TouchableOpacity>
 
-                    <Text style={styles.cardText}>
-                      {item.post.nameLocation}
-                    </Text>
+                    <Text style={styles.cardText}>{item.nameLocation}</Text>
                   </View>
                 </View>
               </View>

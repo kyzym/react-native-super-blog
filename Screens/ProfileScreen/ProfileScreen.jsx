@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { Feather } from "@expo/vector-icons";
 import {
-  Dimensions,
   FlatList,
   Image,
   ImageBackground,
@@ -10,44 +9,21 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import POSTS from "../../assets/vars/posts";
+// import POSTS from "../../assets/vars/posts";
 import styles from "./ProfileScreenStyles";
 import PostCard from "../../Components/PostCard/PostCard";
+import { useDispatch, useSelector } from "react-redux";
+import db from "../../firebase/config";
+import { authSignOutUser } from "../../redux/auth/authOperation";
+import { useWindowDimensions } from "react-native";
 
 const ProfileScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
+  const { userId } = useSelector((state) => state.auth);
   const [userImg, setUserImg] = useState(1);
-  const [posts, setPosts] = useState(POSTS);
-
-  const [windowWidth, setWindowWidth] = useState(
-    Dimensions.get("window").width
-  );
-  const [windowHeight, setWindowHeight] = useState(
-    Dimensions.get("window").height
-  );
-
-  // const onPressAddImage = useCallback(() => {
-  //   setUserImg(1);
-  // }, []);
-
-  // const onPressRemoveImage = useCallback(() => {
-  //   setUserImg(null);
-  // }, []);
-
-  // const onPressLogout = useCallback(() => {
-  //   navigation.navigate("LoginScreen");
-  // }, [navigation]);
-
-  useEffect(() => {
-    const onChange = () => {
-      const width = Dimensions.get("window").width;
-      setWindowWidth(width);
-      const height = Dimensions.get("window").height;
-      setWindowHeight(height);
-    };
-    const dimensionsHandler = Dimensions.addEventListener("change", onChange);
-
-    return () => dimensionsHandler.remove();
-  }, []);
+  // const [posts, setPosts] = useState(POSTS);
+  const [posts, setPosts] = useState([]);
+  const windowDimensions = useWindowDimensions();
 
   useEffect(() => {
     async function prepare() {
@@ -56,26 +32,52 @@ const ProfileScreen = ({ navigation }) => {
     prepare();
   }, []);
 
+  const signOut = () => {
+    // navigation.navigate('Register');
+    dispatch(authSignOutUser());
+  };
+
+  const getDataFromFirestore = async () => {
+    try {
+      await db
+        .firestore()
+        .collection("posts")
+        .where("userId", "==", userId)
+        .onSnapshot((data) =>
+          setPosts(data.docs.map((doc) => ({ ...doc.data() })))
+        );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    getDataFromFirestore();
+  }, []);
+
   return (
     <View style={styles.container}>
       <ImageBackground
         source={require("../../assets/images/PhotoBG.jpg")}
         resizeMode="cover"
-        style={{ ...styles.imageBG, width: windowWidth, height: windowHeight }}
+        style={{
+          ...styles.imageBG,
+          width: windowDimensions.width,
+          height: windowDimensions.height,
+        }}
       >
         <FlatList
           ListHeaderComponent={
             <View
               style={{
                 ...styles.profile,
-                marginTop: windowWidth > 500 ? 100 : 147,
-                width: windowWidth,
+                marginTop: windowDimensions.width > 500 ? 100 : 147,
+                width: windowDimensions.width,
               }}
             >
               <View
                 style={{
                   ...styles.imgUserContainer,
-                  left: (windowWidth - 120) / 2,
+                  left: (windowDimensions.width - 120) / 2,
                 }}
               >
                 <TouchableOpacity
@@ -119,12 +121,17 @@ const ProfileScreen = ({ navigation }) => {
                 ) : null}
               </View>
               <View style={{ position: "absolute", right: 16, top: 22 }}>
-                <Feather name="log-out" size={24} color={"#BDBDBD"} />
+                <Feather
+                  name="log-out"
+                  size={24}
+                  color={"#BDBDBD"}
+                  onPress={signOut}
+                />
               </View>
               <View
                 style={{
                   ...styles.userTitleWrapper,
-                  width: windowWidth - 16 * 2,
+                  width: windowDimensions.width - 16 * 2,
                 }}
               >
                 <Text
@@ -139,7 +146,7 @@ const ProfileScreen = ({ navigation }) => {
           renderItem={({ item }) => (
             <PostCard
               post={item}
-              windowWidth={windowWidth}
+              windowWidth={windowDimensions.width}
               navigation={navigation}
             />
           )}

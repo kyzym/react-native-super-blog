@@ -21,8 +21,8 @@ const MapScreen = ({ route }) => {
       <MapView
         style={styles.mapStyle}
         region={{
-          latitude: 42.148778,
-          longitude: 19.0403046,
+          latitude: route.params.latitude,
+          longitude: route.params.longitude,
           latitudeDelta: 0.1,
           longitudeDelta: 0.1,
         }}

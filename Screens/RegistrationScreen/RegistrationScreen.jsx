@@ -12,13 +12,13 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  Pressable,
 } from "react-native";
 import styles from "./RegistrationScreenStyle.js";
 import { getBorderColor } from "../../assets/helpers/utils.js";
 
 import { useDispatch } from "react-redux";
 import { authSignUpUser } from "../../redux/auth/authOperation";
+import { useWindowDimensions } from "react-native";
 
 const initialState = {
   login: "",
@@ -33,24 +33,7 @@ const RegistrationScreen = ({ navigation }) => {
   const [state, setState] = useState(initialState);
   const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
-
-  const [windowWidth, setWindowWidth] = useState(
-    Dimensions.get("window").width
-  );
-  const [windowHeight, setWindowHeight] = useState(
-    Dimensions.get("window").height
-  );
-  useEffect(() => {
-    const onChange = () => {
-      const width = Dimensions.get("window").width;
-      setWindowWidth(width);
-      const height = Dimensions.get("window").height;
-      setWindowHeight(height);
-    };
-    const dimensionsHandler = Dimensions.addEventListener("change", onChange);
-
-    return () => dimensionsHandler.remove();
-  }, []);
+  const windowDimensions = useWindowDimensions();
 
   const showPasswordHandler = useCallback(() => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
@@ -93,8 +76,8 @@ const RegistrationScreen = ({ navigation }) => {
           resizeMode="cover"
           style={{
             ...styles.imageBG,
-            width: windowWidth,
-            height: windowHeight,
+            width: windowDimensions.width,
+            height: windowDimensions.height,
           }}
         >
           <KeyboardAvoidingView

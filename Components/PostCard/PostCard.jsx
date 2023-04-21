@@ -7,7 +7,7 @@ const PostCard = ({ post, windowWidth, navigation }) => {
   return (
     <View style={{ ...styles.cardContainer, width: windowWidth }}>
       <Image
-        source={post.postImage}
+        source={{ uri: post.photo }}
         style={{ ...styles.cardImage, width: windowWidth - 16 * 2 }}
       />
       <Text
@@ -39,8 +39,18 @@ const PostCard = ({ post, windowWidth, navigation }) => {
           </View>
 
           <View style={{ ...styles.cardWrapper, marginLeft: 145 }}>
-            <Feather name="map-pin" size={24} color={"#BDBDBD"} />
-            <Text style={styles.cardText}>{post.location}</Text>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("MapScreen", {
+                  latitude: item.location.latitude,
+                  longitude: item.location.longitude,
+                })
+              }
+            >
+              <Feather name="map-pin" size={24} color={"#BDBDBD"} />
+            </TouchableOpacity>
+
+            <Text style={styles.cardText}>{post.nameLocation}</Text>
           </View>
         </View>
       </View>

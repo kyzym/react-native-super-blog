@@ -54,7 +54,15 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     marginRight: 16,
+    borderRadius: 16,
     resizeMode: "cover",
+  },
+  commentTextContainer: {
+    padding: 16,
+    backgroundColor: "#00000008",
+    borderTopRightRadius: 6,
+    borderBottomLeftRadius: 6,
+    borderBottomRightRadius: 6,
   },
   commentText: {
     fontSize: 13,

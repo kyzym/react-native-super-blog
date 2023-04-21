@@ -10,7 +10,7 @@ import RegistrationScreen from "./Screens/RegistrationScreen/RegistrationScreen"
 const MainStack = createStackNavigator();
 const ScreenStack = createStackNavigator();
 
-const useRoute = (isAuth) => {
+const useRouter = (isAuth) => {
   return !isAuth ? (
     <MainStack.Navigator initialRouteName="Login">
       <MainStack.Screen
@@ -23,19 +23,9 @@ const useRoute = (isAuth) => {
         name="Register"
         component={RegistrationScreen}
       />
-      <MainStack.Screen
-        options={{
-          headerShown: false,
-          headerTitle: "Posts",
-          headerTitleStyle: { color: "#212121", fontSize: 17 },
-          headerTitleAlign: "center",
-        }}
-        name="Home"
-        component={Home}
-      />
     </MainStack.Navigator>
   ) : (
-    <ScreenStack.Navigator>
+    <ScreenStack.Navigator initialRouteName="Home">
       <ScreenStack.Screen
         options={{ headerShown: false }}
         name="Home"
@@ -55,4 +45,4 @@ const useRoute = (isAuth) => {
   );
 };
 
-export default useRoute;
+export default useRouter;

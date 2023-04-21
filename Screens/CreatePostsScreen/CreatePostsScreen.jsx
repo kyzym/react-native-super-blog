@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import {
   Image,
   Keyboard,
@@ -13,6 +14,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { Camera } from "expo-camera";
 import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
+import db from "../../firebase/config";
 
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import styles from "./CreatePostsScreenStyles";
@@ -26,6 +28,8 @@ const CreatePostsScreen = ({ navigation }) => {
   const [location, setLocation] = useState(null);
   const [nameLocation, setNameLocation] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
+
+  const { userId, login } = useSelector((state) => state.auth);
 
   useEffect(() => {
     (async () => {
@@ -82,10 +86,40 @@ const CreatePostsScreen = ({ navigation }) => {
     }
   };
 
+  const uploadPhotoToServer = async () => {
+    const response = await fetch(photo);
+    const file = await response.blob();
+
+    const uniquePostId = Date.now().toString();
+
+    await db.storage().ref(`postImage/${uniquePostId}`).put(file);
+
+    const processedPhoto = await db
+      .storage()
+      .ref("postImage")
+      .child(uniquePostId)
+      .getDownloadURL();
+    setPhoto(processedPhoto);
+    return processedPhoto;
+  };
+
+  const uploadPostToServer = async () => {
+    try {
+      const photo = await uploadPhotoToServer();
+      const createPost = await db
+        .firestore()
+        .collection("posts")
+        .add({ photo, location, title, nameLocation, userId, login });
+    } catch (error) {
+      console.error("Error adding document: ", error);
+    }
+  };
+
   const addPostBtn = () => {
     setShowKeyboard(false);
     Keyboard.dismiss();
     if (!photo) return;
+
     const post = {
       photo,
       location,
@@ -93,7 +127,9 @@ const CreatePostsScreen = ({ navigation }) => {
       nameLocation,
     };
 
+    uploadPostToServer();
     navigation.navigate("DefaultScreen", { post });
+
     setPhoto(null);
     setTitle(null);
     setLocation(null);
@@ -142,7 +178,7 @@ const CreatePostsScreen = ({ navigation }) => {
             )}
 
             <TouchableOpacity onPress={takePhoto} style={styles.photoIcon}>
-              <FontAwesome name="camera" size={24} color={"#BDBDBD"} />
+              <FontAwesome name="camera" size={24} color={"#"} />
             </TouchableOpacity>
           </Camera>
         )}
@@ -161,20 +197,20 @@ const CreatePostsScreen = ({ navigation }) => {
           <TextInput
             style={{ ...styles.input, paddingLeft: 0 }}
             placeholder="Название..."
-            placeholderTextColor={"#BDBDBD"}
+            placeholderTextColor={"#"}
             inputMode="text"
             value={title}
             onChangeText={(value) => setTitle(value)}
           />
           <View style={styles.inputBox}>
             <TouchableOpacity style={styles.inputIcon}>
-              <Feather name="map-pin" size={24} color={"#BDBDBD"} />
+              <Feather name="map-pin" size={24} color={"#"} />
             </TouchableOpacity>
 
             <TextInput
               style={{ ...styles.input, paddingLeft: 32 }}
               placeholder="Местность..."
-              placeholderTextColor={"#BDBDBD"}
+              placeholderTextColor={"#"}
               inputMode="text"
               value={nameLocation}
               onChangeText={(value) => setNameLocation(value)}
@@ -192,7 +228,7 @@ const CreatePostsScreen = ({ navigation }) => {
             <Text
               style={{
                 ...styles.textButton,
-                color: photo ? "#FFFFFF" : "#BDBDBD",
+                color: photo ? "#FFFFFF" : "#",
               }}
             >
               Опубликовать
@@ -209,7 +245,7 @@ const CreatePostsScreen = ({ navigation }) => {
             }}
             style={styles.buttonGo}
           >
-            <Feather name="trash-2" size={24} color={"#BDBDBD"} />
+            <Feather name="trash-2" size={24} color={"#"} />
           </TouchableOpacity>
         </View>
       </View>
