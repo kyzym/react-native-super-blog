@@ -36,7 +36,7 @@ const PostCard = ({ post, windowWidth, navigation, avatarImage }) => {
               }
             >
               <Feather name="message-circle" size={24} color={"#FF6C00"} />
-              <Text style={styles.cardText}>{post.comments}</Text>
+              <Text style={styles.cardText}>{post.commentsQuantity}</Text>
             </TouchableOpacity>
 
             {/* <View style={{ ...styles.cardWrapper, marginLeft: 24 }}>
@@ -54,7 +54,7 @@ const PostCard = ({ post, windowWidth, navigation, avatarImage }) => {
             >
               <View style={{ ...styles.cardWrapper, marginLeft: 24 }}>
                 <Feather name="thumbs-up" size={24} color={"#FF6C00"} />
-                <Text style={styles.cardText}>{post.likes}</Text>
+                <Text style={styles.cardText}>{post.likesQuantity}</Text>
               </View>
             </TouchableOpacity>
           </View>

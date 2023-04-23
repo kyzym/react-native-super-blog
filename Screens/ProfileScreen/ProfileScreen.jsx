@@ -12,13 +12,7 @@ import {
 import styles from "./ProfileScreenStyles";
 import { useDispatch, useSelector } from "react-redux";
 import db from "../../firebase/config";
-import {
-  collection,
-  query,
-  doc,
-  onSnapshot,
-  updateDoc,
-} from "firebase/compat/firestore";
+
 import { authSignOutUser } from "../../redux/auth/authOperation";
 import { useWindowDimensions } from "react-native";
 import PostCard from "../../Components/PostCard/PostCard";

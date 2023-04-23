@@ -43,10 +43,7 @@ const DefaultScreenPosts = ({ navigation, route }) => {
   }, []);
 
   const { login, email, avatarImage } = useSelector((state) => state.auth);
-  // console.log(
-  //   "state in default screen",
-  //   useSelector((state) => state)
-  // );
+
   const updateCommentsQuantity = (postId, newQuantity) => {
     setPhoto((prevState) =>
       prevState.map((item) =>

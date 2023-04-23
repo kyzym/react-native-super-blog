@@ -116,6 +116,8 @@ const CreatePostsScreen = ({ navigation }) => {
         userId,
         login,
         createdAt: new Date().getTime(),
+        likesQuantity: 0,
+        likeStatus: false,
       });
     } catch (error) {
       console.error("Error adding document: ", error);

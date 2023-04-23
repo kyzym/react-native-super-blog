@@ -38,9 +38,9 @@ const RegistrationScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const showPasswordHandler = setShowPassword(
-    (prevShowPassword) => !prevShowPassword
-  );
+  const showPasswordHandler = () => {
+    setShowPassword((prevShowPassword) => !prevShowPassword);
+  };
 
   const hideKeyboard = useCallback(() => {
     setShowKeyboard(false);

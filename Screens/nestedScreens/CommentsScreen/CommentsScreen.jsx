@@ -35,7 +35,7 @@ const CommentsScreen = ({ navigation, route }) => {
 
   const [comment, setComment] = useState("");
   const [allComments, setAllComments] = useState([]);
-  console.log(allComments.length);
+  // console.log(allComments.length);
   const commentHandler = (comment) => setComment(comment);
   const dispatch = useDispatch();
 
