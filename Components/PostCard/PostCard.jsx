@@ -3,7 +3,7 @@ import { View, Image, Text, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import styles from "./PostCardStyles";
 
-const PostCard = ({ post, windowWidth, navigation }) => {
+const PostCard = ({ post, windowWidth, navigation, avatarImage }) => {
   return (
     <View style={{ ...styles.cardContainer, width: windowWidth }}>
       <Image
@@ -26,24 +26,45 @@ const PostCard = ({ post, windowWidth, navigation }) => {
           >
             <TouchableOpacity
               style={styles.cardWrapper}
-              onPress={() => navigation.navigate("CommentsScreen")}
+              onPress={() =>
+                navigation.navigate("CommentsScreen", {
+                  postId: post.id,
+                  photo: post.photo,
+                  commentsQuantity: post.commentsQuantity,
+                  avatarImage,
+                })
+              }
             >
               <Feather name="message-circle" size={24} color={"#FF6C00"} />
               <Text style={styles.cardText}>{post.comments}</Text>
             </TouchableOpacity>
 
-            <View style={{ ...styles.cardWrapper, marginLeft: 24 }}>
+            {/* <View style={{ ...styles.cardWrapper, marginLeft: 24 }}>
               <Feather name="thumbs-up" size={24} color={"#FF6C00"} />
               <Text style={styles.cardText}>{post.likes}</Text>
-            </View>
+            </View> */}
+            <TouchableOpacity
+              style={styles.cardWrapper}
+              onPress={
+                post.likeStatus
+                  ? () =>
+                      removeLike(post.id, post.likesQuantity, post.likeStatus)
+                  : () => addLike(post.id, post.likesQuantity, post.likeStatus)
+              }
+            >
+              <View style={{ ...styles.cardWrapper, marginLeft: 24 }}>
+                <Feather name="thumbs-up" size={24} color={"#FF6C00"} />
+                <Text style={styles.cardText}>{post.likes}</Text>
+              </View>
+            </TouchableOpacity>
           </View>
 
           <View style={{ ...styles.cardWrapper, marginLeft: 145 }}>
             <TouchableOpacity
               onPress={() =>
                 navigation.navigate("MapScreen", {
-                  latitude: item.location.latitude,
-                  longitude: item.location.longitude,
+                  latitude: post.location.latitude,
+                  longitude: post.location.longitude,
                 })
               }
             >

@@ -9,19 +9,24 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-// import POSTS from "../../assets/vars/posts";
 import styles from "./ProfileScreenStyles";
-import PostCard from "../../Components/PostCard/PostCard";
 import { useDispatch, useSelector } from "react-redux";
 import db from "../../firebase/config";
+import {
+  collection,
+  query,
+  doc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/compat/firestore";
 import { authSignOutUser } from "../../redux/auth/authOperation";
 import { useWindowDimensions } from "react-native";
+import PostCard from "../../Components/PostCard/PostCard";
 
 const ProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { userId } = useSelector((state) => state.auth);
+  const { userId, login, avatarImage } = useSelector((state) => state.auth);
   const [userImg, setUserImg] = useState(1);
-  // const [posts, setPosts] = useState(POSTS);
   const [posts, setPosts] = useState([]);
   const windowDimensions = useWindowDimensions();
 
@@ -44,7 +49,7 @@ const ProfileScreen = ({ navigation }) => {
         .collection("posts")
         .where("userId", "==", userId)
         .onSnapshot((data) =>
-          setPosts(data.docs.map((doc) => ({ ...doc.data() })))
+          setPosts(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
         );
     } catch (error) {
       console.log(error);
@@ -53,6 +58,30 @@ const ProfileScreen = ({ navigation }) => {
   useEffect(() => {
     getDataFromFirestore();
   }, []);
+
+  const addLike = async (postId, likesQuantity) => {
+    try {
+      const ref = await db.firestore().collection("posts").doc(postId);
+      ref.update({
+        likesQuantity: likesQuantity + 1,
+        likeStatus: true,
+      });
+    } catch (error) {
+      console.log("error-message.add-like", error.message);
+    }
+  };
+
+  const removeLike = async (postId, likesQuantity) => {
+    try {
+      const ref = await db.firestore().collection("posts").doc(postId);
+      ref.update({
+        likesQuantity: likesQuantity - 1,
+        likeStatus: false,
+      });
+    } catch (error) {
+      console.log("error-message.add-like", error.message);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -116,7 +145,7 @@ const ProfileScreen = ({ navigation }) => {
                 {userImg === 1 ? (
                   <Image
                     style={styles.avatarImage}
-                    source={require("../../assets/images/UserIcon.jpg")}
+                    source={{ uri: avatarImage }}
                   />
                 ) : null}
               </View>
@@ -137,20 +166,22 @@ const ProfileScreen = ({ navigation }) => {
                 <Text
                   style={{ ...styles.userTitle, fontFamily: "Roboto-Medium" }}
                 >
-                  Natali Romanova
+                  {login}
                 </Text>
               </View>
             </View>
           }
           data={posts}
           renderItem={({ item }) => (
-            <PostCard
-              post={item}
-              windowWidth={windowDimensions.width}
-              navigation={navigation}
-            />
+            <>
+              <PostCard
+                post={item}
+                windowWidth={windowDimensions.width}
+                navigation={navigation}
+                avatarImage={avatarImage}
+              />
+            </>
           )}
-          keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
         />
       </ImageBackground>

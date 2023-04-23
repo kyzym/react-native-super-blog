@@ -15,6 +15,7 @@ import { Camera } from "expo-camera";
 import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
 import db from "../../firebase/config";
+import uuid from "react-native-uuid";
 
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import styles from "./CreatePostsScreenStyles";
@@ -30,6 +31,7 @@ const CreatePostsScreen = ({ navigation }) => {
   const [type, setType] = useState(Camera.Constants.Type.back);
 
   const { userId, login } = useSelector((state) => state.auth);
+  const uniquePostId = uuid.v4();
 
   useEffect(() => {
     (async () => {
@@ -54,10 +56,10 @@ const CreatePostsScreen = ({ navigation }) => {
     Keyboard.dismiss();
   };
 
-  const takePhoto = async () => {
+  const takePicture = async () => {
     if (camera) {
       try {
-        const { uri } = await camera.takePictureAsync();
+        const { uri } = await camera.takePictureAsync({ quality: 0.1 });
 
         let location = await Location.getCurrentPositionAsync({});
         const coords = {
@@ -67,7 +69,6 @@ const CreatePostsScreen = ({ navigation }) => {
         setLocation(coords);
 
         setPhoto(uri);
-        console.log("photo", uri);
       } catch (e) {
         if (
           e.message.includes(
@@ -87,9 +88,8 @@ const CreatePostsScreen = ({ navigation }) => {
 
   const uploadPhotoToServer = async () => {
     const response = await fetch(photo);
-    const file = await response.blob();
 
-    const uniquePostId = Date.now().toString();
+    const file = await response.blob();
 
     await db.storage().ref(`postImage/${uniquePostId}`).put(file);
 
@@ -99,18 +99,24 @@ const CreatePostsScreen = ({ navigation }) => {
       .child(uniquePostId)
       .getDownloadURL();
     setPhoto(processedPhoto);
+
     return processedPhoto;
   };
 
   const uploadPostToServer = async () => {
     try {
       const photo = await uploadPhotoToServer();
-      const createPost = await db
-        .firestore()
-        .collection("posts")
-        .add({ photo, location, title, nameLocation, userId, login });
-      console.log("createPost", createPost);
-      console.log(location);
+
+      await db.firestore().collection("posts").add({
+        id: uniquePostId,
+        photo,
+        location,
+        title,
+        nameLocation,
+        userId,
+        login,
+        createdAt: new Date().getTime(),
+      });
     } catch (error) {
       console.error("Error adding document: ", error);
     }
@@ -126,6 +132,9 @@ const CreatePostsScreen = ({ navigation }) => {
       location,
       title,
       nameLocation,
+      commentsQuantity: 0,
+      likesQuantity: 0,
+      likeStatus: false,
     };
 
     uploadPostToServer();
@@ -178,7 +187,7 @@ const CreatePostsScreen = ({ navigation }) => {
               </View>
             )}
 
-            <TouchableOpacity onPress={takePhoto} style={styles.photoIcon}>
+            <TouchableOpacity onPress={takePicture} style={styles.photoIcon}>
               <FontAwesome name="camera" size={24} color={"#BDBDBD"} />
             </TouchableOpacity>
           </Camera>
@@ -186,18 +195,18 @@ const CreatePostsScreen = ({ navigation }) => {
 
         {photo ? (
           <TouchableOpacity>
-            <Text style={styles.addPhoto}>Редактировать фото</Text>
+            <Text style={styles.addPhoto}>Edit photo</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity>
-            <Text style={styles.addPhoto}>Загрузите фото</Text>
+            <Text style={styles.addPhoto}>Upload photo</Text>
           </TouchableOpacity>
         )}
 
         <View style={styles.form}>
           <TextInput
             style={{ ...styles.input, paddingLeft: 0 }}
-            placeholder="Название..."
+            placeholder="Title..."
             placeholderTextColor={"#BDBDBD"}
             inputMode="text"
             value={title}
@@ -221,6 +230,7 @@ const CreatePostsScreen = ({ navigation }) => {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={addPostBtn}
+            disabled={!photo}
             style={{
               ...styles.button,
               backgroundColor: photo ? "#FF6C00" : "#F6F6F6",
@@ -232,7 +242,7 @@ const CreatePostsScreen = ({ navigation }) => {
                 color: photo ? "#FFFFFF" : "#BDBDBD",
               }}
             >
-              Опубликовать
+              Share
             </Text>
           </TouchableOpacity>
 

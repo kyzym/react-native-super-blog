@@ -8,14 +8,16 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Message,
 } from "react-native";
 import db from "../../firebase/config";
 import { useWindowDimensions } from "react-native";
+import { useSelector } from "react-redux";
 
 const DefaultScreenPosts = ({ navigation, route }) => {
   const [photo, setPhoto] = useState([]);
   const windowDimensions = useWindowDimensions();
-
+  // console.log(photo);
   useEffect(() => {
     async function prepare() {
       await SplashScreen.preventAutoHideAsync();
@@ -28,6 +30,7 @@ const DefaultScreenPosts = ({ navigation, route }) => {
       await db
         .firestore()
         .collection("posts")
+        .orderBy("createdAt", "desc")
         .onSnapshot((data) =>
           setPhoto(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
         );
@@ -39,18 +42,28 @@ const DefaultScreenPosts = ({ navigation, route }) => {
     getDataFromFirestore();
   }, []);
 
+  const { login, email, avatarImage } = useSelector((state) => state.auth);
+  // console.log(
+  //   "state in default screen",
+  //   useSelector((state) => state)
+  // );
+  const updateCommentsQuantity = (postId, newQuantity) => {
+    setPhoto((prevState) =>
+      prevState.map((item) =>
+        item.id === postId ? { ...item, commentsQuantity: newQuantity } : item
+      )
+    );
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
         ListHeaderComponent={
           <View style={styles.userSection}>
-            <Image
-              style={styles.avatarImage}
-              source={require("../../assets/images/UserIcon.jpg")}
-            />
+            <Image style={styles.avatarImage} source={{ uri: avatarImage }} />
             <View style={styles.userInfo}>
-              <Text style={styles.textUserName}>Natali Romanova</Text>
-              <Text style={styles.textUserEmail}>email@example.com</Text>
+              <Text style={styles.textUserName}>{login}</Text>
+              <Text style={styles.textUserEmail}>{email}</Text>
             </View>
           </View>
         }
@@ -64,7 +77,6 @@ const DefaultScreenPosts = ({ navigation, route }) => {
               marginBottom: 91,
             }}
           >
-            {/* {console.log("item___", item)} */}
             <Image
               source={{ uri: item.photo }}
               style={{
@@ -105,6 +117,9 @@ const DefaultScreenPosts = ({ navigation, route }) => {
                       navigation.navigate("CommentsScreen", {
                         postId: item.id,
                         photo: item.photo,
+                        commentsQuantity: item.commentsQuantity,
+                        avatarImage,
+                        updateCommentsQuantity,
                       })
                     }
                   >
@@ -113,7 +128,7 @@ const DefaultScreenPosts = ({ navigation, route }) => {
                       size={24}
                       color={"#BDBDBD"}
                     />
-                    <Text style={styles.cardText}>{item.comments}</Text>
+                    <Text style={styles.cardText}>{item.commentsQuantity}</Text>
                   </TouchableOpacity>
 
                   <View style={{ ...styles.cardWrapper, marginLeft: 56 }}>

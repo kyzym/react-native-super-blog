@@ -45,7 +45,6 @@ const LoginScreen = ({ navigation }) => {
 
     try {
       await dispatch(authSignInUser(state));
-      console.log("state in login", state);
 
       setState(initialState);
 

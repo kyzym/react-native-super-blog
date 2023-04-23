@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  Dimensions,
   Image,
   ImageBackground,
   Keyboard,
@@ -20,56 +19,113 @@ import { useDispatch } from "react-redux";
 import { authSignUpUser } from "../../redux/auth/authOperation";
 import { useWindowDimensions } from "react-native";
 
-const initialState = {
-  login: "",
-  email: "",
-  password: "",
-};
+import * as ImagePicker from "expo-image-picker";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const RegistrationScreen = ({ navigation }) => {
+  const windowDimensions = useWindowDimensions();
+  const dispatch = useDispatch();
+
   const [focusedInput, setFocusedInput] = useState(null);
   const [userImg, setUserImg] = useState(null);
   const [showKeyboard, setShowKeyboard] = useState(false);
-  const [state, setState] = useState(initialState);
+
   const [showPassword, setShowPassword] = useState(false);
-  const dispatch = useDispatch();
-  const windowDimensions = useWindowDimensions();
+  const [pickedImagePath, setPickedImagePath] = useState("");
 
-  const showPasswordHandler = useCallback(() => {
-    setShowPassword((prevShowPassword) => !prevShowPassword);
-  }, []);
+  const [login, setLogin] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const keyboardHide = useCallback(async () => {
+  const showPasswordHandler = setShowPassword(
+    (prevShowPassword) => !prevShowPassword
+  );
+
+  const hideKeyboard = useCallback(() => {
     setShowKeyboard(false);
     Keyboard.dismiss();
+  }, []);
 
-    if (state.login === "" || state.email === "" || state.password === "") {
-      return alert("All fields need to be filled!");
+  const registerUser = async () => {
+    if (
+      login === "" ||
+      email === "" ||
+      password === "" ||
+      pickedImagePath === ""
+    ) {
+      return alert("All fields need to be filled, even avatar!");
     }
 
+    setIsLoading(true);
     try {
-      await dispatch(authSignUpUser(state));
+      const imageRef = await uploadPhotoToServer();
 
-      console.log(state);
-      setState(initialState);
+      const newUser = {
+        login,
+        email,
+        password,
+        avatarImage: imageRef,
+      };
+      const res = await dispatch(authSignUpUser(newUser));
+      console.log(`${res},"res"\n ${imageRef},imageRef `);
+      setLogin("");
+      setEmail("");
+      setPassword("");
+      setPickedImagePath("");
 
-      navigation.navigate("Home");
+      // navigation.navigate("Home");
     } catch (error) {
       alert("Registration failed: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
-  }, [state, navigation]);
+  };
 
-  const keyboardHideOut = useCallback(() => {
-    setShowKeyboard(false);
-    Keyboard.dismiss();
-  }, []);
+  const downloadAvatar = async () => {
+    try {
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-  const handleInputChange = useCallback((field, value) => {
-    setState((prevState) => ({ ...prevState, [field]: value }));
-  }, []);
+      // if (permissionResult.granted === false) {
+      //   alert("You've refused to allow this app to access your photos!");
+      //   return;
+      // }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.1,
+      });
+
+      if (!result.canceled) {
+        setPickedImagePath(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.log("error-message", error.message);
+    }
+  };
+
+  const deleteAvatar = () => setPickedImagePath("");
+
+  const uploadPhotoToServer = async () => {
+    try {
+      const response = await fetch(pickedImagePath);
+      const file = await response.blob();
+      const storage = getStorage();
+      const uniquePostId = Date.now().toString();
+      const storageRef = ref(storage, `avatarImage/${uniquePostId}`);
+      await uploadBytes(storageRef, file);
+      const photoRef = await getDownloadURL(storageRef);
+      return photoRef;
+    } catch (error) {
+      console.log("error-message.upload-photo", error.message);
+    }
+  };
 
   return (
-    <TouchableWithoutFeedback onPress={keyboardHideOut}>
+    <TouchableWithoutFeedback onPress={hideKeyboard}>
       <View style={styles.container}>
         <ImageBackground
           source={require("../../assets/images/PhotoBG.jpg")}
@@ -87,46 +143,44 @@ const RegistrationScreen = ({ navigation }) => {
               style={{ ...styles.form, marginBottom: showKeyboard ? -192 : 0 }}
             >
               <View style={styles.imgUserContainer}>
-                <TouchableOpacity
-                  onPress={() => {
-                    setUserImg(1);
-                  }}
-                  activeOpacity={0.8}
-                  style={{
-                    ...styles.imgAdd,
-                    display: userImg === 1 ? "none" : "flex",
-                  }}
-                >
-                  <Image
-                    width={25}
-                    height={25}
-                    source={require("../../assets/images/add.png")}
-                  />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => {
-                    setUserImg(null);
-                  }}
-                  activeOpacity={0.8}
-                  style={{
-                    ...styles.imgDel,
-                    display: userImg === null ? "none" : "flex",
-                  }}
-                >
-                  <Image
-                    width={25}
-                    height={25}
-                    source={require("../../assets/images/del.png")}
-                  />
-                </TouchableOpacity>
-
-                {userImg === 1 ? (
-                  <Image
-                    style={styles.imgUser}
-                    source={require("../../assets/images/UserIcon.jpg")}
-                  />
-                ) : null}
+                {pickedImagePath ? (
+                  <>
+                    <View>
+                      <Image
+                        style={styles.avatarImage}
+                        source={{ uri: pickedImagePath }}
+                      />
+                    </View>
+                    <TouchableOpacity
+                      onPress={deleteAvatar}
+                      style={{
+                        ...styles.imgDel,
+                      }}
+                    >
+                      <Image
+                        width={25}
+                        height={25}
+                        source={require("../../assets/images/del.png")}
+                      />
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <>
+                    {/* <View></View> */}
+                    <TouchableOpacity
+                      onPress={downloadAvatar}
+                      style={{
+                        ...styles.imgAdd,
+                      }}
+                    >
+                      <Image
+                        width={25}
+                        height={25}
+                        source={require("../../assets/images/add.png")}
+                      />
+                    </TouchableOpacity>
+                  </>
+                )}
               </View>
 
               <Text style={styles.titleText}>Registration</Text>
@@ -138,8 +192,8 @@ const RegistrationScreen = ({ navigation }) => {
                 placeholder="Login"
                 placeholderTextColor={"#BDBDBD"}
                 inputMode="text"
-                value={state.login}
-                onChangeText={(value) => handleInputChange("login", value)}
+                value={login}
+                onChangeText={(login) => setLogin(login)}
                 onFocus={() => {
                   setFocusedInput("login");
                   setShowKeyboard(true);
@@ -154,8 +208,8 @@ const RegistrationScreen = ({ navigation }) => {
                 placeholder="Email address"
                 placeholderTextColor={"#BDBDBD"}
                 inputMode="email"
-                value={state.email}
-                onChangeText={(value) => handleInputChange("email", value)}
+                value={email}
+                onChangeText={(email) => setEmail(email)}
                 onFocus={() => {
                   setFocusedInput("email");
                   setShowKeyboard(true);
@@ -171,8 +225,8 @@ const RegistrationScreen = ({ navigation }) => {
                   placeholder="Password"
                   placeholderTextColor={"#BDBDBD"}
                   secureTextEntry={!showPassword}
-                  value={state.password}
-                  onChangeText={(value) => handleInputChange("password", value)}
+                  value={password}
+                  onChangeText={(password) => setPassword(password)}
                   onFocus={() => {
                     setFocusedInput("password");
                     setShowKeyboard(true);
@@ -194,8 +248,9 @@ const RegistrationScreen = ({ navigation }) => {
 
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={keyboardHide}
+                onPress={registerUser}
                 style={styles.button}
+                disabled={isLoading}
               >
                 <Text style={styles.textButton}>Register</Text>
               </TouchableOpacity>

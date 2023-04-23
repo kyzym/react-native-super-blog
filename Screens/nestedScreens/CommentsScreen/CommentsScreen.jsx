@@ -5,7 +5,6 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import * as SplashScreen from "expo-splash-screen";
 import {
   Alert,
-  Dimensions,
   FlatList,
   Image,
   Keyboard,
@@ -14,17 +13,18 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import POST_DATA from "../../../assets/vars/postData";
+
 import styles from "./CommentsScreenStyles";
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import db from "../../../firebase/config";
 import { useWindowDimensions } from "react-native";
+import { updateCommentsQuantityAction } from "../../../redux/comments/commentsSlice";
 
 const CommentsScreen = ({ navigation, route }) => {
-  const { postId, photo } = route.params;
-  const [posts, setPosts] = useState(POST_DATA);
   const windowDimensions = useWindowDimensions();
+  const { postId, photo } = route.params;
+  const { login, avatarImage } = useSelector((state) => state.auth);
 
   useEffect(() => {
     async function prepare() {
@@ -32,10 +32,18 @@ const CommentsScreen = ({ navigation, route }) => {
     }
     prepare();
   }, []);
+
   const [comment, setComment] = useState("");
   const [allComments, setAllComments] = useState([]);
-  const { login } = useSelector((state) => state.auth);
+  console.log(allComments.length);
   const commentHandler = (comment) => setComment(comment);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    return () => {
+      dispatch(updateCommentsQuantityAction(postId, allComments.length));
+    };
+  }, [allComments.length, postId, dispatch]);
 
   const onSend = async () => {
     if (!comment.trim()) {
@@ -45,11 +53,18 @@ const CommentsScreen = ({ navigation, route }) => {
     const date = new Date().toLocaleDateString();
     const time = new Date().toLocaleTimeString();
 
-    db.firestore()
-      .collection("posts")
-      .doc(postId)
-      .collection("comments")
-      .add({ comment, login, date, time });
+    db.firestore().collection("posts").doc(postId).collection("comments").add({
+      comment,
+      login,
+      date,
+      time,
+      avatarImage,
+    });
+
+    const updatedCommentsQuantity = allComments.length + 1;
+    await db.firestore().collection("posts").doc(postId).update({
+      commentsQuantity: updatedCommentsQuantity,
+    });
 
     Alert.alert(`Your comment has been sent!`);
 
@@ -76,7 +91,7 @@ const CommentsScreen = ({ navigation, route }) => {
   useEffect(() => {
     getCommentsFromFirestore();
   }, []);
-  console.log(allComments);
+  // console.log("allComments.length", allComments.length);
 
   return (
     <View style={{ ...styles.container }}>
@@ -103,7 +118,18 @@ const CommentsScreen = ({ navigation, route }) => {
               width: windowDimensions.width - 16 * 2,
             }}
           >
-            {/* <Image source={{ uri: item.commentAvatar }} style={styles.commentAvatarImage} /> */}
+            {/* {console.log("item__", item)} */}
+            <Image
+              source={{ uri: item.avatarImage }}
+              style={{
+                width: 28,
+                height: 28,
+                backgroundColor: "#F6F6F6",
+                marginRight: 16,
+                borderRadius: 16,
+                resizeMode: "cover",
+              }}
+            />
             <View
               style={{
                 ...styles.commentTextContainer,
@@ -118,27 +144,8 @@ const CommentsScreen = ({ navigation, route }) => {
           </View>
         )}
         keyExtractor={(item, index) => index.toString()}
-        // ListFooterComponent={
-        //   <View style={{ width: "100%", marginBottom: 32 }}>
-        //     <TextInput
-        //       value={comment}
-        //       style={styles.input}
-        //       placeholder="Leave comment..."
-        //       cursorColor={"#BDBDBD"}
-        //       placeholderTextColor={"#BDBDBD"}
-        //       onChangeText={commentHandler}
-        //     />
-        //     <TouchableOpacity style={styles.sendButton} onPress={onSend}>
-        //       <FontAwesome5
-        //         name="arrow-circle-up"
-        //         size={34}
-        //         color={"#FF6C00"}
-        //       />
-        //     </TouchableOpacity>
-        //   </View>
-        // }
       />
-      <View style={{ width: "100%", marginBottom: 12 }}>
+      <View style={{ width: "100%", marginBottom: 12, alignItems: "flex-end" }}>
         <TextInput
           value={comment}
           style={styles.input}

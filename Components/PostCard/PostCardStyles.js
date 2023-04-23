@@ -62,12 +62,15 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   cardContainer: {
+    flex: 1,
     alignItems: "center",
     backgroundColor: "#FFFFFF",
   },
   cardImage: {
     resizeMode: "cover",
     borderRadius: 8,
+    width: 343,
+    height: 240,
   },
   cardTitle: {
     marginTop: 8,

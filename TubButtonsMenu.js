@@ -1,29 +1,34 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { TouchableOpacity, View } from "react-native";
-import { AntDesign, Entypo, Feather, Fontisto } from "@expo/vector-icons";
+import { AntDesign, Feather, Fontisto } from "@expo/vector-icons";
 
 import CreatePostsScreen from "./Screens/CreatePostsScreen/CreatePostsScreen";
 import PostsScreen from "./Screens/PostsScreen/PostsScreen";
 import ProfileScreen from "./Screens/ProfileScreen/ProfileScreen";
 
+import { authSignOutUser } from "./redux/auth/authOperation";
+import { useDispatch } from "react-redux";
+
 const Tab = createBottomTabNavigator();
 
 const TubButtonsMenu = ({ navigation }) => {
+  const dispatch = useDispatch();
   const iconSize = 24;
   const iconColor = "rgba(33, 33, 33, 0.8)";
 
   return (
     <Tab.Navigator
       screenOptions={{
+        tabBarShowLabel: false,
         tabBarStyle: {
-          height: 71,
+          height: 63,
           justifyContent: "center",
           paddingLeft: 80,
           paddingRight: 80,
         },
         headerTitleAlign: "center",
-        headerStyle: { height: 88 },
+        headerStyle: { height: 68 },
         headerShadowVisible: {
           elevation: 1,
           backgroundColor: "#FFFFFF",
@@ -50,11 +55,21 @@ const TubButtonsMenu = ({ navigation }) => {
           tabBarShowLabel: false,
           tabBarHideOnKeyboard: true,
           tabBarIcon: () => (
-            <AntDesign name="appstore-o" size={iconSize} color={iconColor} />
+            <View>
+              <AntDesign
+                name="appstore-o"
+                size={24}
+                color={"rgba(33, 33, 33, 0.8)"}
+              />
+            </View>
           ),
           headerRight: () => (
-            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-              <Entypo name="log-out" size={iconSize} color={"#BDBDBD"} />
+            <TouchableOpacity
+              onPress={() => {
+                dispatch(authSignOutUser());
+              }}
+            >
+              <Feather name="log-out" size={24} color={"#BDBDBD"} />
             </TouchableOpacity>
           ),
         }}
@@ -65,8 +80,16 @@ const TubButtonsMenu = ({ navigation }) => {
         options={{
           title: "Create post",
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Feather name="arrow-left" size={iconSize} color={"#BDBDBD"} />
+            // <TouchableOpacity onPress={() => navigation.goBack()}>
+            //   <Feather name="arrow-left" size={iconSize} color={"#BDBDBD"} />
+            // </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                // navigation.goBack();
+                console.log("you press go-back");
+              }}
+            >
+              <Feather name="arrow-left" size={24} color={"#BDBDBD"} />
             </TouchableOpacity>
           ),
           tabBarShowLabel: false,

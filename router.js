@@ -36,11 +36,6 @@ const useRouter = (isAuth) => {
         name="Posts"
         component={PostsScreen}
       />
-      <ScreenStack.Screen
-        options={{ headerShown: true }}
-        name="CreatePostsScreen"
-        component={CreatePostsScreen}
-      />
     </ScreenStack.Navigator>
   );
 };

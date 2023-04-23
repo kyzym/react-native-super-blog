@@ -3,7 +3,7 @@ import db from "../../firebase/config";
 import { authSlice } from "./authReducer";
 
 const authSignUpUser =
-  ({ login, email, password }) =>
+  ({ login, email, password, avatarImage }) =>
   async (dispatch, getState) => {
     try {
       await db.auth().createUserWithEmailAndPassword(email, password);
@@ -12,13 +12,16 @@ const authSignUpUser =
 
       await user.updateProfile({
         displayName: login,
+        photoURL: avatarImage,
       });
 
-      const { displayName, uid } = await db.auth().currentUser;
+      const { displayName, uid, photoURL } = await db.auth().currentUser;
 
       const userUpdateProfile = {
         login: displayName,
         userId: uid,
+        email,
+        avatarImage: photoURL,
       };
 
       dispatch(authSlice.actions.updateUserProfile(userUpdateProfile));
@@ -33,11 +36,13 @@ const authSignInUser =
   async (dispatch, getState) => {
     try {
       const user = await db.auth().signInWithEmailAndPassword(email, password);
-      console.log("user_login", user);
+
+      // console.log("User data after login:", user);
+
       return user;
     } catch (error) {
       console.log("error_authSignInUser", error.message);
-      // console.log(error.message);
+
       throw error;
     }
   };
@@ -59,6 +64,8 @@ const authStateChangeUser = () => async (dispatch, getState) => {
         const userUpdateProfile = {
           login: user.displayName,
           userId: user.uid,
+          email: user.email,
+          avatarImage: user.photoURL,
         };
 
         dispatch(authSlice.actions.authStateChange({ stateChange: true }));

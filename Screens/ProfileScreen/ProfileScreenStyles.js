@@ -68,6 +68,8 @@ const styles = StyleSheet.create({
   cardImage: {
     resizeMode: "cover",
     borderRadius: 8,
+    width: 343,
+    height: 240,
   },
   cardTitle: {
     marginTop: 8,

@@ -118,6 +118,26 @@ const styles = StyleSheet.create({
     zIndex: 0,
     borderRadius: 12,
   },
+  imageThumb: {
+    top: -60,
+    position: "absolute",
+    width: 120,
+    height: 120,
+    backgroundColor: "#F6F6F6",
+    borderRadius: 16,
+  },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 16,
+    resizeMode: "cover",
+  },
+  addButton: {
+    position: "absolute",
+    top: 21,
+    width: 25,
+    height: 25,
+  },
 });
 
 export default styles;
